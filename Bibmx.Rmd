@@ -102,6 +102,8 @@ Net.country.collab <- biblioNetwork(country.collab, analysis = "collaboration", 
 # Plot the network
 #Net.country.collab.plot <- 
 networkPlot(Net.country.collab, n = 20, Title = "Country Collaboration", type = "circle", size=TRUE, remove.multiple=FALSE,labelsize=0.7)
+
+collabByRegionPlot(Net.country.collab, n = 10)
 ```
 
 ##Keyword co-occurrences
@@ -123,11 +125,12 @@ CS$
 
 #Thematic evolution
 ```{r}
-theme.evo <- thematicEvolution(df, field = "DE", years=c(2012, 2017), stemming = F)
+theme.evo <- thematicEvolution(df, field = "ID", years=c(2012, 2017, 2021), stemming = T, minFreq = 5, synonyms = c("exosomes;exosome"), remove.terms = 'knee')
 plotThematicEvolution(theme.evo$Nodes, theme.evo$Edges)
 ```
 
-#Cumulative KW
+#Keywords
+##Cumulative KW
 ```{r}
 topKW <- KeywordGrowth(df, Tag = "ID", sep = ";", top=10, cdf=TRUE)
 topKW
@@ -135,8 +138,12 @@ topKW
 library(reshape2)
 library(ggplot2)
 df.topKW <- melt(topKW, id='Year')
-ggplot(df.topKW,aes(Year,value, group=variable, color=variable))+geom_line()
+ggplot(df.topKW,aes(Year, variable, color=variable))+
+  geom_point()
 ```
 
+```{r}
+fieldByYear(df, timespan = c(2000,2024), synonyms = c("exosomes;exosome"))
+```
 
 
