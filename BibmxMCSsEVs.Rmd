@@ -1,0 +1,73 @@
+---
+title: "Bibmex MSCs-EVs"
+author: "Gabriel"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+#Details
+Articles retrieved from Web of Science database
+Search query used:
+  ((TS=(mesenchymal stromal cell)) OR TS=(MSCs) OR TS=(Mesenchymal stem cell)) AND (TS=(exosom*) OR TS=(micro vesicle*)) AND DT=(Article) AND PY=(2000-2024) AND LA=English
+
+Data exported as plain text named download-##
+  All search results exported to 10 files since the database only accepts 500 items per download
+  
+  
+#Packages
+```{r}
+library(tidyverse)
+library(bibliometrix)
+```
+
+#Data import
+```{r}
+df <- bibliometrix::convert2df(paste0("E:/Doutorado/Manuscritos/Bibliometrics/MSC-EVs/Data/", list.files("E:/Doutorado/Manuscritos/Bibliometrics/MSC-EVs/Data/")), dbsource = 'wos', format = 'plaintext')
+```
+
+#Data analysis
+```{r}
+b.analysis <- biblioAnalysis(df)
+
+res.summ <- summary(b.analysis)
+
+plot(x=b.analysis, k=10, pause=F)
+```
+
+##Citation analysis
+```{r}
+df$CR
+
+cit.manuscript <- citations(df, field='article', sep=';')
+cbind(cit.manuscript$Cited[1:10])
+
+cit.author <- citations(df, field='author', sep=';')
+cbind(cit.author$Cited[1:10])
+```
+
+The function localCitations generates the frequency table of the most local cited authors. Local citations measure how many times an author (or a document) included in this collection have been cited by other authors also in the collection.
+```{r}
+local.cit <- localCitations(df, sep = ';')
+local.cit$Authors[1:10,]
+local.cit$Papers[1:10,]
+```
+
+The function dominance calculates the authors’ dominance ranking as proposed by Kumar & Kumar, 2008.
+
+Kumar, S., & Kumar, S. (2008). Collaboration in research productivity in oil seed research institutes of India. In Proceedings of Fourth International Conference on Webometrics, Informetrics and Scientometrics.
+The Dominance Factor is a ratio indicating the fraction of multi-authored articles in which a scholar appears as the first author.
+```{r}
+author.dom <- dominance(b.analysis, k=10)
+author.dom
+```
+
+```{r}
+topAU <- authorProdOverTime(df, k = 15, graph = TRUE)
+```
+
+
+##Bibliographic network
+```{r}
+
+```
+
