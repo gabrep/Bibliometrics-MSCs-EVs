@@ -123,7 +123,7 @@ CS$
 
 #Thematic evolution
 ```{r}
-theme.evo <- thematicEvolution(df, field = "ID", years=c(2012, 2017, 2022), stemming = F)
+theme.evo <- thematicEvolution(df, field = "DE", years=c(2012, 2017), stemming = F)
 plotThematicEvolution(theme.evo$Nodes, theme.evo$Edges)
 ```
 
