@@ -67,7 +67,76 @@ topAU <- authorProdOverTime(df, k = 15, graph = TRUE)
 
 
 ##Bibliographic network
+
+cocMatrix is a general function to compute a bipartite network selecting one of the metadata attributes.
+
+For example, to create a network Manuscript x Publication Source you have to use the field tag “SO”:
 ```{r}
+manscrpt.pub <- cocMatrix(df, Field = "SO", sep = ";")
+sort(Matrix::colSums(manscrpt.pub), decreasing = TRUE)[1:5]
+
+author.network <- cocMatrix(df, Field = "AU", sep = ";")
+sort(Matrix::colSums(author.network), decreasing = TRUE)[1:5]
+```
+
+```{r}
+NetMatrix <- biblioNetwork(df, analysis = "coupling", network = "references", sep = ";")
+
+
+#Scientific collaboration network is a network where nodes are authors and links are co-authorships as the latter is one of the most well-documented forms of scientific collaboration (Glanzel, 2004).
+scientific.collaboration <- biblioNetwork(df, analysis = "collaboration", network = "authors", sep = ";")
+netstat <- networkStat(scientific.collaboration)
+summary(netstat)
+
+networkPlot(scientific.collaboration,  normalize = "salton", weighted=NULL, n = 100, Title = "Scientific collaboration", type = "fruchterman", size=5,size.cex=T,remove.multiple=TRUE,labelsize=0.8,label.n=10,label.cex=F, )
+
+networkPlot(scientific.collaboration)
+networkPlot(scientific.collaboration, Title = 'Scientific collaboration', label.cex = F, n=50, halo = F, size = 5, remove.isolates = F, type = 'fruchterman')
+```
+
+##Country Scientific Collaboration
+```{r}
+country.collab <- metaTagExtraction(df, Field = "AU_CO", sep = ";")
+Net.country.collab <- biblioNetwork(country.collab, analysis = "collaboration", network = "countries", sep = ";")
+
+# Plot the network
+#Net.country.collab.plot <- 
+networkPlot(Net.country.collab, n = 20, Title = "Country Collaboration", type = "circle", size=TRUE, remove.multiple=FALSE,labelsize=0.7)
+```
+
+##Keyword co-occurrences
+```{r}
+# Create keyword co-occurrences network
+key.cooc <- biblioNetwork(df, analysis = "co-occurrences", network = "keywords", sep = ";")
+
+# Plot the network
+networkPlot(key.cooc, normalize = 'equivalence', weighted=T, n = 30, Title = "Keyword Co-occurrences", type = "fruchterman", size.cex = T, size = 25, edgesize = 5, label.cex = T, labelsize = 2)
 
 ```
+
+
+##Co-Word Analysis: The conceptual structure of a field
+```{r}
+CS <- conceptualStructure(df,field="ID", method="CA", minDegree=4, clust=5, stemming=T, labelsize=10, documents=10)
+CS$
+```
+
+#Thematic evolution
+```{r}
+theme.evo <- thematicEvolution(df, field = "DE", years=c(2012, 2017), stemming = F)
+plotThematicEvolution(theme.evo$Nodes, theme.evo$Edges)
+```
+
+#Cumulative KW
+```{r}
+topKW <- KeywordGrowth(df, Tag = "ID", sep = ";", top=10, cdf=TRUE)
+topKW
+
+library(reshape2)
+library(ggplot2)
+df.topKW <- melt(topKW, id='Year')
+ggplot(df.topKW,aes(Year,value, group=variable, color=variable))+geom_line()
+```
+
+
 
