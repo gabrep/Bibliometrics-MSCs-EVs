@@ -31,18 +31,29 @@ b.analysis <- biblioAnalysis(df)
 
 res.summ <- summary(b.analysis)
 
-plot(x=b.analysis, k=10, pause=F)
+p1 <- plot(x=b.analysis, k=10, pause=F)
+
+res.summ
+
+pdf("../Results/Annual scientific production.pdf", width = 5, height = 4)
+p1$AnnualScientProd
+dev.off()
+
 ```
 
 ##Citation analysis
+Análise dos artigos que foram citados pelos artigos presentes na coleção
 ```{r}
 df$CR
 
 cit.manuscript <- citations(df, field='article', sep=';')
 cbind(cit.manuscript$Cited[1:10])
+#Valadi et al é o artigo mais citado dentre dos artigos da coleção. Este artigo se refere a mecanismos de exossomos; não envolve MSCs e portanto não está presente na coleção.
 
 cit.author <- citations(df, field='author', sep=';')
 cbind(cit.author$Cited[1:10])
+
+cit.manuscript$Cited %>% View()
 ```
 
 The function localCitations generates the frequency table of the most local cited authors. Local citations measure how many times an author (or a document) included in this collection have been cited by other authors also in the collection.
@@ -50,6 +61,8 @@ The function localCitations generates the frequency table of the most local cite
 local.cit <- localCitations(df, sep = ';')
 local.cit$Authors[1:10,]
 local.cit$Papers[1:10,]
+
+#local.cit$Papers %>% View()
 ```
 
 The function dominance calculates the authors’ dominance ranking as proposed by Kumar & Kumar, 2008.
@@ -63,6 +76,7 @@ author.dom
 
 ```{r}
 topAU <- authorProdOverTime(df, k = 15, graph = TRUE)
+topAU$graph
 ```
 
 
@@ -95,15 +109,28 @@ networkPlot(scientific.collaboration, Title = 'Scientific collaboration', label.
 ```
 
 ##Country Scientific Collaboration
+Como cada artigo traz a filiação com codigos sobrescritos, o numero de filiações é menor que o numero de autores
 ```{r}
 country.collab <- metaTagExtraction(df, Field = "AU_CO", sep = ";")
-Net.country.collab <- biblioNetwork(country.collab, analysis = "collaboration", network = "countries", sep = ";")
+country.collab <- metaTagExtraction(df, Field = "AU1_CO", sep = ";")
 
+
+knitr::kable(table(unlist(strsplit(country.collab$AU_CO,';'))), 'latex')
+
+country.contrib <- as.data.frame(table(unlist(strsplit(country.collab$AU_CO,';'))))
+slice_max(country.contrib, order_by = Freq, n=10) %>% openxlsx::write.xlsx(., file='E:/Doutorado/Manuscritos/Bibliometrics/MSC-EVs/Results/Top10_contrib_countries.xlsx')
+res.summ$MostProdCountries %>% openxlsx::write.xlsx(., file='E:/Doutorado/Manuscritos/Bibliometrics/MSC-EVs/Results/Top10_prod_countries.xlsx')
+
+
+
+Net.country.collab <- biblioNetwork(country.collab, analysis = "collaboration", network = "countries", short = F)
 # Plot the network
 #Net.country.collab.plot <- 
-networkPlot(Net.country.collab, n = 20, Title = "Country Collaboration", type = "circle", size=TRUE, remove.multiple=FALSE,labelsize=0.7)
+networkPlot(Net.country.collab, n = 20, Title = "Country Collaboration", type = "circle", size=TRUE, remove.multiple=FALSE,labelsize=0.7, verbose=F)
 
-collabByRegionPlot(Net.country.collab, n = 10)
+
+collabByRegionPlot(as.matrix(Net.country.collab[c(1:25, 27:34), c(1:25, 27:34)]), edgesize = 4, label.cex = TRUE, labelsize=2.5,
+weighted = TRUE, size=0.5, size.cex=TRUE, community.repulsion = 0)
 ```
 
 ##Keyword co-occurrences
